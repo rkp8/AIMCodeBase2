@@ -64,6 +64,7 @@ import java.util.*;
 public class AutoDriverOnlySimulator implements Simulator {
 
   private static HashMap<String, Integer> DestinationCount = new HashMap<String, Integer>();
+  private static HashMap<Integer, Integer> ArrivalCount = new HashMap<Integer, Integer>();
 
   private static HashMap<String, Integer> LaneCount = new HashMap<String, Integer>();
 
@@ -100,6 +101,21 @@ public class AutoDriverOnlySimulator implements Simulator {
     }
   }
 
+  /**
+   * Get the IDs of the Lanes that make up this Road, in order from left to right.
+   *
+   * @return the ids of the lanes that make up this Road, in order from left to right
+   */
+  public String getLanesIds(List<Lane> lanes) {
+    String out = "[";
+
+    for(Lane l: lanes) {
+      out += l.getId() + " ";
+
+    }
+    out+="]";
+    return out;
+  }
 
 
   /////////////////////////////////
@@ -1029,18 +1045,27 @@ public class AutoDriverOnlySimulator implements Simulator {
         vehicle.printState();
       }
 
-      if(DestinationCount.containsKey(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).toString())){
-        DestinationCount.put(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).toString(), ((DestinationCount.get(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).toString())) +1));
+      if(DestinationCount.containsKey(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).getName() + " " + getLanesIds(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).getLanes()))){
+        DestinationCount.put(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).getName() + " " + getLanesIds(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).getLanes()), ((DestinationCount.get(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).getName() + " " + getLanesIds(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).getLanes()))) +1));
       }
       else{
-        DestinationCount.put(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).toString(), 1);
+        DestinationCount.put((VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).getName() + " " + getLanesIds(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).getLanes())), 1);
 
       }
+
+      if(ArrivalCount.containsKey(VinRegistry.getSpawnPointFromVIN(vehicle.getVIN()).getLane().getId())) {
+        ArrivalCount.put((VinRegistry.getSpawnPointFromVIN(vehicle.getVIN()).getLane().getId()), ((ArrivalCount.get(VinRegistry.getSpawnPointFromVIN(vehicle.getVIN()).getLane().getId())) + 1));
+      }
+      else
+        ArrivalCount.put((VinRegistry.getSpawnPointFromVIN(vehicle.getVIN()).getLane().getId()),1);
 
 
     }
 
-  }
+
+    }
+
+
 
 
   /////////////////////////////////
@@ -1087,8 +1112,13 @@ public class AutoDriverOnlySimulator implements Simulator {
       completedVINs.add(vin);
       numOfCompletedVehicles++;
 
-      if(DestinationCount.containsKey(VinRegistry.getDestRoadFromVIN(vin).toString())){
-        DestinationCount.put((VinRegistry.getDestRoadFromVIN(vin).toString()), ((DestinationCount.get(VinRegistry.getDestRoadFromVIN(vin).toString())) -1));
+      if(DestinationCount.containsKey(VinRegistry.getDestRoadFromVIN(vin).getName() + " " +getLanesIds(VinRegistry.getDestRoadFromVIN(vin).getLanes()))){
+        DestinationCount.put((VinRegistry.getDestRoadFromVIN(vin).getName() + " " + getLanesIds(VinRegistry.getDestRoadFromVIN(vin).getLanes())), ((DestinationCount.get(VinRegistry.getDestRoadFromVIN(vin).getName() + " " + getLanesIds(VinRegistry.getDestRoadFromVIN(vin).getLanes()))) -1));
+
+
+      }
+      if(ArrivalCount.containsKey(VinRegistry.getSpawnPointFromVIN(vin).getLane().getId())){
+        ArrivalCount.put((VinRegistry.getSpawnPointFromVIN(vin).getLane().getId()), ((ArrivalCount.get(VinRegistry.getSpawnPointFromVIN(vin).getLane().getId())) -1));
 
 
       }
@@ -1101,14 +1131,21 @@ public class AutoDriverOnlySimulator implements Simulator {
     String out = "";
 
     out+= currentTime + "\n";
-
+    Iterator it2 = ArrivalCount.entrySet().iterator();
     Iterator it = DestinationCount.entrySet().iterator();
+    while (it2.hasNext()) {
+      Map.Entry pair1 = (Map.Entry)it2.next();
+      out += (pair1.getValue()).toString() + " coming from " + pair1.getKey() + "\n";
+    }
     while (it.hasNext()) {
       Map.Entry pair = (Map.Entry)it.next();
       out += (pair.getValue()).toString() + " heading to " + pair.getKey() + "\n";
     }
 
+
     DestinationCount.clear();
+    ArrivalCount.clear();
+
 
     System.out.println(out);
 
