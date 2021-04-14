@@ -9,7 +9,7 @@ AIM4 is currently maintained by Tsz-Chiu Au <chiu@cs.utexas.edu>.
 
    -Added additional metrics for Gross Throughput, Average Time Delay per vehicle, Max Time Delay and Standard Deviation of Time Delay
    
-   -Also prints the number of vehicles going to each destination at each time step (this will be used to dynamically route traffic)
+   -Also prints the number of vehicles coming from a lane and going to each lane at each time step (this will be used to dynamically route traffic)
    
 <br>
 
