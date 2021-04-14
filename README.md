@@ -1,5 +1,5 @@
 # AIM4CodeBase2 
-This project is based on AIM4 which is a 100% Java-based autonomous intersection management system with a built-in simulation environment. AIM4 was built by Stone et al. at University of Texas: https://www.cs.utexas.edu/~aim/. 
+This project is based on AIM4, which is a 100% Java-based autonomous intersection management system with a built-in simulation environment. AIM4 was built by Stone et al. at University of Texas: https://www.cs.utexas.edu/~aim/. 
 AIM4 is currently maintained by Tsz-Chiu Au <chiu@cs.utexas.edu>.
 <br>
 <br>
