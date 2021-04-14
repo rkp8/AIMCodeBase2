@@ -1223,6 +1223,9 @@ public class V2ICoordinator implements Coordinator {
       // preparation in coordinator.
       throw new RuntimeException("V2ICoordinator: Arrival time of request " +
                                  "has already passed.");
+    case TOO_LOW_PRIORITY:
+      System.err.printf("vin %d\n", vehicle.getVIN());
+      throw new RuntimeException("V2ICoordinator: Other lanes have a higher priority due to traffic flow");
     default:
       System.err.printf("%s\n", msg.getReason());
       throw new RuntimeException("V2ICoordinator: Unknown reason for " +

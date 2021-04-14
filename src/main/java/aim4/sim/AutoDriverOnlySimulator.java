@@ -37,7 +37,6 @@ import aim4.driver.DriverSimView;
 import aim4.driver.ProxyDriver;
 import aim4.im.IntersectionManager;
 import aim4.im.v2i.V2IManager;
-import aim4.im.v2i.policy.BasePolicy;
 import aim4.map.BasicMap;
 import aim4.map.DataCollectionLine;
 import aim4.map.Road;
@@ -63,11 +62,21 @@ import java.util.*;
  */
 public class AutoDriverOnlySimulator implements Simulator {
 
-  private static HashMap<String, Integer> DestinationCount = new HashMap<String, Integer>();
+  private static HashMap<Road, Integer> DestinationCount = new HashMap<Road, Integer>();
   private static HashMap<Integer, Integer> ArrivalCount = new HashMap<Integer, Integer>();
+  private static HashMap<Integer, Integer> VehicleCount = new HashMap<Integer, Integer>();
+
+  public static int VehicleCountTotal;
+
+  private static Map<Lane, SortedMap<Double,VehicleSimView>> TotalList = new HashMap<Lane, SortedMap<Double, VehicleSimView>>();
+
 
   private static HashMap<String, Integer> LaneCount = new HashMap<String, Integer>();
 
+
+  public static HashMap<Integer, Double> ArrivalLaneIDsWeightedPriorities = new HashMap<Integer, Double>();
+  public static HashMap<Integer, Double> DepartureLaneIDsWeightedPriorities = new HashMap<Integer, Double>();
+  public static HashMap<Integer, Double> CongestionWeightedPriorities = new HashMap<Integer, Double>();
 
 
   /////////////////////////////////
@@ -528,6 +537,7 @@ public class AutoDriverOnlySimulator implements Simulator {
         }
       }
     }
+
 
     return vehicleLists;
   }
@@ -1045,11 +1055,11 @@ public class AutoDriverOnlySimulator implements Simulator {
         vehicle.printState();
       }
 
-      if(DestinationCount.containsKey(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).getName() + " " + getLanesIds(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).getLanes()))){
-        DestinationCount.put(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).getName() + " " + getLanesIds(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).getLanes()), ((DestinationCount.get(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).getName() + " " + getLanesIds(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).getLanes()))) +1));
+      if(DestinationCount.containsKey(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()))){
+        DestinationCount.put(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()), ((DestinationCount.get(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()))) +1));
       }
       else{
-        DestinationCount.put((VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).getName() + " " + getLanesIds(VinRegistry.getDestRoadFromVIN(vehicle.getVIN()).getLanes())), 1);
+        DestinationCount.put((VinRegistry.getDestRoadFromVIN(vehicle.getVIN())), 1);
 
       }
 
@@ -1112,8 +1122,8 @@ public class AutoDriverOnlySimulator implements Simulator {
       completedVINs.add(vin);
       numOfCompletedVehicles++;
 
-      if(DestinationCount.containsKey(VinRegistry.getDestRoadFromVIN(vin).getName() + " " +getLanesIds(VinRegistry.getDestRoadFromVIN(vin).getLanes()))){
-        DestinationCount.put((VinRegistry.getDestRoadFromVIN(vin).getName() + " " + getLanesIds(VinRegistry.getDestRoadFromVIN(vin).getLanes())), ((DestinationCount.get(VinRegistry.getDestRoadFromVIN(vin).getName() + " " + getLanesIds(VinRegistry.getDestRoadFromVIN(vin).getLanes()))) -1));
+      if(DestinationCount.containsKey(VinRegistry.getDestRoadFromVIN(vin))){
+        DestinationCount.put((VinRegistry.getDestRoadFromVIN(vin)), ((DestinationCount.get(VinRegistry.getDestRoadFromVIN(vin))) -1));
 
 
       }
@@ -1135,16 +1145,124 @@ public class AutoDriverOnlySimulator implements Simulator {
     Iterator it = DestinationCount.entrySet().iterator();
     while (it2.hasNext()) {
       Map.Entry pair1 = (Map.Entry)it2.next();
-      out += (pair1.getValue()).toString() + " coming from " + pair1.getKey() + "\n";
+      out += (pair1.getValue()).toString() + " coming from " + pair1.getKey().toString() + "\n";
     }
     while (it.hasNext()) {
       Map.Entry pair = (Map.Entry)it.next();
-      out += (pair.getValue()).toString() + " heading to " + pair.getKey() + "\n";
+      out += (pair.getValue()).toString() + " heading to " + pair.getKey().toString() + " " + getLanesIds(((Road)(pair.getKey())).getLanes())  + "\n";
     }
+
+    //Initially all lanes are given equal priority:
+    ArrivalLaneIDsWeightedPriorities.put(0, 1.0);
+    DepartureLaneIDsWeightedPriorities.put(0, 1.0);
+    CongestionWeightedPriorities.put(0, 1.0);
+
+    ArrivalLaneIDsWeightedPriorities.put(1, 1.0);
+    DepartureLaneIDsWeightedPriorities.put(1, 1.0);
+    CongestionWeightedPriorities.put(1, 1.0);
+
+    ArrivalLaneIDsWeightedPriorities.put(2, 1.0);
+    DepartureLaneIDsWeightedPriorities.put(2, 1.0);
+    CongestionWeightedPriorities.put(2, 1.0);
+
+    ArrivalLaneIDsWeightedPriorities.put(3, 1.0);
+    DepartureLaneIDsWeightedPriorities.put(3, 1.0);
+    CongestionWeightedPriorities.put(3, 1.0);
+
+    ArrivalLaneIDsWeightedPriorities.put(4, 1.0);
+    DepartureLaneIDsWeightedPriorities.put(4, 1.0);
+    CongestionWeightedPriorities.put(4, 1.0);
+
+    ArrivalLaneIDsWeightedPriorities.put(5, 1.0);
+    DepartureLaneIDsWeightedPriorities.put(5, 1.0);
+    CongestionWeightedPriorities.put(5, 1.0);
+
+    ArrivalLaneIDsWeightedPriorities.put(6, 1.0);
+    DepartureLaneIDsWeightedPriorities.put(6, 1.0);
+    CongestionWeightedPriorities.put(6, 1.0);
+
+    ArrivalLaneIDsWeightedPriorities.put(7, 1.0);
+    DepartureLaneIDsWeightedPriorities.put(7, 1.0);
+    CongestionWeightedPriorities.put(7, 1.0);
+
+    ArrivalLaneIDsWeightedPriorities.put(8, 1.0);
+    DepartureLaneIDsWeightedPriorities.put(8, 1.0);
+    CongestionWeightedPriorities.put(8, 1.0);
+
+    ArrivalLaneIDsWeightedPriorities.put(9, 1.0);
+    DepartureLaneIDsWeightedPriorities.put(9, 1.0);
+    CongestionWeightedPriorities.put(9, 1.0);
+
+    ArrivalLaneIDsWeightedPriorities.put(10, 1.0);
+    DepartureLaneIDsWeightedPriorities.put(10, 1.0);
+    CongestionWeightedPriorities.put(10, 1.0);
+
+    ArrivalLaneIDsWeightedPriorities.put(11, 1.0);
+    DepartureLaneIDsWeightedPriorities.put(11, 1.0);
+    CongestionWeightedPriorities.put(11, 1.0);
+
+
+    int ArrivalCountTotal = 0;
+    int DestinationCountTotal = 0;
+    VehicleCountTotal = getActiveVehicles().size();
+
+
+
+    //Update the Weighted Priorities of each different lane both for Arrivals and Departures
+    for(Integer x : ArrivalCount.values()){
+      ArrivalCountTotal += x;
+
+    }
+
+    for(Integer y : DestinationCount.values()){
+      DestinationCountTotal += y;
+
+    }
+
+
+    for(int i = 0; i<12; i++){
+
+      if(ArrivalCount.containsKey(i))
+        ArrivalLaneIDsWeightedPriorities.put(i, (((double)ArrivalCount.get(i))/ArrivalCountTotal));
+      else if(ArrivalCountTotal >0)
+        ArrivalLaneIDsWeightedPriorities.put(i, (((double)ArrivalLaneIDsWeightedPriorities.get(i))/ArrivalCountTotal));
+
+    }
+
+
+    for(Road r : DestinationCount.keySet()){
+
+      List<Lane> lanes = r.getLanes();
+      for(Lane l: lanes) {
+          DepartureLaneIDsWeightedPriorities.put(l.getId(), ((double) (DestinationCount.get(r)) / DestinationCountTotal));
+      }
+
+    }
+
+    TotalList = computeVehicleLists();
+
+    //First populate VehicleCount:
+    for(Lane l: TotalList.keySet()) {
+      VehicleCount.put(l.getId(), TotalList.get(l).values().size());
+    }
+
+
+
+    for(int i = 0; i<12; i++){
+
+      if(VehicleCount.containsKey(i))
+        if(ArrivalCountTotal >0)
+          CongestionWeightedPriorities.put(i, (((double)VehicleCount.get(i))/VehicleCountTotal));
+
+    }
+
+
+
 
 
     DestinationCount.clear();
     ArrivalCount.clear();
+    VehicleCount.clear();
 
 
     System.out.println(out);

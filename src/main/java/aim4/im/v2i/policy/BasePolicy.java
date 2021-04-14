@@ -45,6 +45,7 @@ import aim4.map.Road;
 import aim4.msg.i2v.Confirm;
 import aim4.msg.i2v.Reject;
 import aim4.msg.v2i.*;
+import aim4.sim.AutoDriverOnlySimulator;
 import aim4.sim.StatCollector;
 import aim4.util.HashMapRegistry;
 import aim4.util.Registry;
@@ -119,6 +120,24 @@ public final class BasePolicy implements Policy, BasePolicyCallback {
       return new ProposalFilterResult(Reject.Reason.ARRIVAL_TIME_TOO_LARGE);
     }
 
+   /* //Added for proof of concept, removes lanes which do not have a high enough priority,
+    // based on real-time traffic patterns and congestion
+    BasePolicy.removeProposalForNonPriorityLanes(
+            myProposals);
+    if (myProposals.isEmpty()) {
+      return new ProposalFilterResult(Reject.Reason.NO_CLEAR_PATH);
+    }*/
+
+    System.out.println("New proposals: ");
+    ProposalFilterResult current = new ProposalFilterResult(myProposals);
+    System.out.println(current.getProposals().get(0).getArrivalLaneID() + " to " + current.getProposals().get(0).getDepartureLaneID());
+    System.out.println();
+
+
+
+
+
+
 
     // return the remaining proposals
     return new ProposalFilterResult(myProposals);
@@ -143,6 +162,73 @@ public final class BasePolicy implements Policy, BasePolicyCallback {
       }
     }
   }
+
+  /**
+   * Remove proposals going to non-priority lanes
+   *
+   * @param proposals   a list of proposals
+   */
+  private static void removeProposalForNonPriorityLanes(
+          List<Request.Proposal> proposals) {
+    for (Iterator<Request.Proposal> tpIter = proposals.listIterator();
+         tpIter.hasNext(); ) {
+      Request.Proposal prop = tpIter.next();
+
+      System.out.println("Arrival Lane Weighted Priorities: ");
+
+      AutoDriverOnlySimulator.ArrivalLaneIDsWeightedPriorities.entrySet().forEach(entry -> {
+        System.out.println(entry.getKey() + " " + entry.getValue());
+      });
+
+      System.out.println("Departure Lane Weighted Priorities: ");
+
+      AutoDriverOnlySimulator.DepartureLaneIDsWeightedPriorities.entrySet().forEach(entry -> {
+        System.out.println(entry.getKey() + " " + entry.getValue());
+      });
+      System.out.println();
+
+      System.out.println("Congestion Lane Weighted Priorities: ");
+
+      AutoDriverOnlySimulator.CongestionWeightedPriorities.entrySet().forEach(entry -> {
+        System.out.println(entry.getKey() + " " + entry.getValue());
+      });
+      System.out.println();
+
+
+      double maxArrivalPriority = maxUsingIteration(AutoDriverOnlySimulator.ArrivalLaneIDsWeightedPriorities);
+      double maxDeparturePriority = maxUsingIteration(AutoDriverOnlySimulator.DepartureLaneIDsWeightedPriorities);
+      double maxCongestionPriority = maxUsingIteration(AutoDriverOnlySimulator.CongestionWeightedPriorities);
+
+
+      if ((maxArrivalPriority - (AutoDriverOnlySimulator.ArrivalLaneIDsWeightedPriorities.get(prop.getArrivalLaneID())) > 0.2) && (maxDeparturePriority - (AutoDriverOnlySimulator.DepartureLaneIDsWeightedPriorities.get(prop.getDepartureLaneID())) > 0.2)) {
+        System.out.println("Rejected");
+        tpIter.remove();
+      }
+
+      int total_vehicles = AutoDriverOnlySimulator.VehicleCountTotal;
+
+      if(total_vehicles > 30) {
+        if (((maxCongestionPriority - (AutoDriverOnlySimulator.CongestionWeightedPriorities.get(prop.getArrivalLaneID()))) > 0.2) && ((maxCongestionPriority - (AutoDriverOnlySimulator.CongestionWeightedPriorities.get(prop.getDepartureLaneID()))) < 0.2)) {
+          System.out.println("Rejected");
+          tpIter.remove();
+        }
+      }
+
+
+    }
+  }
+
+  public static <K, V extends Comparable<V>> V maxUsingIteration(Map<K, V> map) {
+    Map.Entry<K, V> maxEntry = null;
+    for (Map.Entry<K, V> entry : map.entrySet()) {
+      if (maxEntry == null || entry.getValue()
+              .compareTo(maxEntry.getValue()) > 0) {
+        maxEntry = entry;
+      }
+    }
+    return maxEntry.getValue();
+  }
+
 
   /**
    * Remove proposals whose arrival time is larger than the current time plus
