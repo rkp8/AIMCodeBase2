@@ -1,5 +1,5 @@
-# AIM4 
-AIM4 is a 100% Java-based autonomous intersection management system with a built-in simulation environment.
+# AIM4CodeBase2 
+This project is based on AIM4 which is a 100% Java-based autonomous intersection management system with a built-in simulation environment.
 This program is based on the source code of AIM3, which is written by Kurt Dresner.
 AIM4 is currently maintained by Tsz-Chiu Au <chiu@cs.utexas.edu>.
 <br>
