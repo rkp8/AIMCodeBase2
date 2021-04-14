@@ -1140,9 +1140,10 @@ public class AutoDriverOnlySimulator implements Simulator {
 
     String out = "";
 
-    out+= currentTime + "\n";
+    out+= "Time Step: " + currentTime + "\n";
     Iterator it2 = ArrivalCount.entrySet().iterator();
     Iterator it = DestinationCount.entrySet().iterator();
+
     while (it2.hasNext()) {
       Map.Entry pair1 = (Map.Entry)it2.next();
       out += (pair1.getValue()).toString() + " coming from " + pair1.getKey().toString() + "\n";
@@ -1256,7 +1257,12 @@ public class AutoDriverOnlySimulator implements Simulator {
 
     }
 
-
+    out+= "\n Total Vehicles: " + VehicleCountTotal + "\n";
+    Iterator it3 = VehicleCount.entrySet().iterator();
+    while (it3.hasNext()) {
+      Map.Entry pair = (Map.Entry)it3.next();
+      out += (pair.getValue()).toString() + " vehicles on lane " + pair.getKey().toString() + "\n";
+    }
 
 
 
