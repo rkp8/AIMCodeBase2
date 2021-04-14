@@ -10,9 +10,9 @@ AIM4 is currently maintained by Tsz-Chiu Au <chiu@cs.utexas.edu>.
    
    -Also prints the number of vehicles coming from a lane and going to each lane at each time step (this will be used to dynamically route traffic)
    
-   -Attempted to implement Dynamic Policy to reduce Congestion 
+   -Attempted to implement Dynamic Policy to reduce Congestion (Not yet working)
    
-   -New method to filter out reservation requests which are not coming from a currently congested lane
+   -New method to reject reservation requests that are not coming in from a currently congested lane
 <br>
 
    
