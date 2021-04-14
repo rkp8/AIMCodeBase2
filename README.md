@@ -33,7 +33,7 @@ AIM4 is currently maintained by Tsz-Chiu Au <chiu@cs.utexas.edu>.
 
    <br>
 
-<b>To Run Local Simulation: </b>
+# To Run Local Simulation: 
 
 1. Install Apache Maven (version >= 2.2.1):
 
